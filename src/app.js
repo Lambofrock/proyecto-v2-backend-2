@@ -1,5 +1,6 @@
 import path from "path";
-
+import passport from "passport";
+import initializePassport from "./config/passport.config.js";
 import cookieParser from "cookie-parser";
 import mongoose from 'mongoose';
 import viewsRouter from "./routes/user.router.js";
@@ -17,9 +18,12 @@ dotenv.config();
 const firmaCookie = process.env.FIRMA_COOKIE || 'firmacookie';
 app.use(cookieParser(firmaCookie));
 
+
 app.use(express.static(path.join(__dirname, "public")));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+initializePassport();
+app.use(passport.initialize()); 
 
 app.engine("handlebars", handlebars.engine());
 app.set("views", __dirname + "/views");

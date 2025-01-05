@@ -2,8 +2,9 @@ import { Router } from "express";
 import userServices from "../models/user.model.js";
 import { generateToken, isValidPassword } from "../utils.js";
 import jwt from "jsonwebtoken";
-
+import { passportCall,authorization } from "../utils.js";
 const router = Router();
+
 
 router.post("/register", async (req, res) => {
   try {
@@ -23,7 +24,10 @@ router.post("/login", async (req, res) => {
     console.log(email, password);
     const user = userServices.findOne({ email: email });
     if (!user) {
-      return res.status(400).send({ message: "Usuario no registrado aca?" });
+        let token = jwt.sign({ email,rol:"user"}, "secretitosecretoso", { expiresIn : "24h"});
+        res.cookie('tokenCookie', token, {httpOnly: true, maxAge:60*60*1000 }).send({message : "Login exitoso"});
+
+              return res.status(400).send({ message: "Usuario no registrado aca?" });
     }
 
     // if (!userServices.isValidPassword(user, req.body.password)) {
@@ -42,5 +46,7 @@ router.post("/login", async (req, res) => {
     console.log(error);
   }
 });
-
+router.get('/current', passportCall('jwt'), authorization("user") , (req, res) => {
+    res.send({ status: 'success', payload: req.user });
+});    
 export default router;
